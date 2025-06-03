@@ -9,23 +9,22 @@ app = FastAPI(
     title="Don Roque Forrajeria API",
     docs_url="/documentacion",
     redoc_url=None,
-    openapi_url="/api/openapi.json"
+    openapi_url="/openapi.json"
 )
 
-@app.post("/api/forrajeria/crearproducto")
+@app.post("/forrajeria/crearproducto")
 def crear_producto(producto: ProductoCreate, db: Session = Depends(get_db)):
     nuevo_producto = Productos(
         nombre=producto.nombre,
         precio=producto.precio,
         stock=producto.stock,
-        subtotal=producto.subtotal
     )
     db.add(nuevo_producto)
     db.commit()
     db.refresh(nuevo_producto)
     return {"mensaje": "Producto creado exitosamente", "producto_id": nuevo_producto.id}
 
-@app.put("/api/forrajeria/producto/{producto_id}")
+@app.put("/forrajeria/producto/{producto_id}")
 def actualizar_producto(producto_id: int, producto: ProductoUpdate, db: Session = Depends(get_db)):
     producto_db = db.query(Productos).filter(Productos.id == producto_id).first()
     if not producto_db:
@@ -38,14 +37,12 @@ def actualizar_producto(producto_id: int, producto: ProductoUpdate, db: Session 
         producto_db.precio = producto.precio
     if producto.stock is not None:
         producto_db.stock = producto.stock
-    if producto.subtotal is not None:
-        producto_db.subtotal = producto.subtotal
 
     db.commit()
     db.refresh(producto_db)
 
     return {"mensaje": "Producto actualizado exitosamente", "producto": producto_db}
-@app.delete("/api/forrajeria/producto/{producto_id}")
+@app.delete("/forrajeria/producto/{producto_id}")
 def eliminar_producto(producto_id: int, db: Session = Depends(get_db)):
     producto_db = db.query(Productos).filter(Productos.id == producto_id).first()
     if not producto_db:
@@ -56,12 +53,12 @@ def eliminar_producto(producto_id: int, db: Session = Depends(get_db)):
     
     return {"mensaje": f"Producto con ID {producto_id} eliminado exitosamente"}
 
-@app.get("/api/forrajeria/productos", response_model=List[ProductoCreate])
+@app.get("/forrajeria/productos", response_model=List[ProductoCreate])
 def obtener_productos(db: Session = Depends(get_db)):
     productos = db.query(Productos).all()
     return productos
 
-@app.get("/api/forrajeria/producto/{producto_id}", response_model=ProductoOut)
+@app.get("/forrajeria/producto/{producto_id}", response_model=ProductoOut)
 def obtener_producto_por_id(producto_id: int, db: Session = Depends(get_db)):
     producto = db.query(Productos).filter(Productos.id == producto_id).first()
     if not producto:

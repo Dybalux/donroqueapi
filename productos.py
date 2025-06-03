@@ -9,6 +9,5 @@ class Productos(Base):
     nombre = Column(String, nullable=False)
     precio = Column(Float, nullable=False)
     stock = Column(Float, nullable=False)
-    subtotal = Column(Float, nullable=False)
 
 Base.metadata.create_all(engine)
