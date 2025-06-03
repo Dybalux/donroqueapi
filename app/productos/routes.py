@@ -1,18 +1,13 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from .models import Productos
+from .schemas import ProductoCreate, ProductoUpdate, ProductoOut
+from db import get_db,Base
 from typing import List
-from productos import Productos  # Importo la clase Productos directo
-from db import get_db
-from schemas import ProductoCreate, ProductoUpdate, ProductoOut
 
-app = FastAPI(
-    title="Don Roque Forrajeria API",
-    docs_url="/documentacion",
-    redoc_url=None,
-    openapi_url="/openapi.json"
-)
+router = APIRouter(prefix="/forrajeria", tags=["Productos"])
 
-@app.post("/forrajeria/crearproducto")
+@router.post("/crearproducto")
 def crear_producto(producto: ProductoCreate, db: Session = Depends(get_db)):
     nuevo_producto = Productos(
         nombre=producto.nombre,
@@ -24,7 +19,7 @@ def crear_producto(producto: ProductoCreate, db: Session = Depends(get_db)):
     db.refresh(nuevo_producto)
     return {"mensaje": "Producto creado exitosamente", "producto_id": nuevo_producto.id}
 
-@app.put("/forrajeria/producto/{producto_id}")
+@router.put("/producto/{producto_id}")
 def actualizar_producto(producto_id: int, producto: ProductoUpdate, db: Session = Depends(get_db)):
     producto_db = db.query(Productos).filter(Productos.id == producto_id).first()
     if not producto_db:
@@ -42,7 +37,7 @@ def actualizar_producto(producto_id: int, producto: ProductoUpdate, db: Session 
     db.refresh(producto_db)
 
     return {"mensaje": "Producto actualizado exitosamente", "producto": producto_db}
-@app.delete("/forrajeria/producto/{producto_id}")
+@router.delete("/producto/{producto_id}")
 def eliminar_producto(producto_id: int, db: Session = Depends(get_db)):
     producto_db = db.query(Productos).filter(Productos.id == producto_id).first()
     if not producto_db:
@@ -53,12 +48,12 @@ def eliminar_producto(producto_id: int, db: Session = Depends(get_db)):
     
     return {"mensaje": f"Producto con ID {producto_id} eliminado exitosamente"}
 
-@app.get("/forrajeria/productos", response_model=List[ProductoCreate])
+@router.get("/productos", response_model=List[ProductoCreate])
 def obtener_productos(db: Session = Depends(get_db)):
     productos = db.query(Productos).all()
     return productos
 
-@app.get("/forrajeria/producto/{producto_id}", response_model=ProductoOut)
+@router.get("/producto/{producto_id}", response_model=ProductoOut)
 def obtener_producto_por_id(producto_id: int, db: Session = Depends(get_db)):
     producto = db.query(Productos).filter(Productos.id == producto_id).first()
     if not producto:

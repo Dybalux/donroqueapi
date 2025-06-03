@@ -12,7 +12,7 @@ class ProductoUpdate(BaseModel):
     stock: Optional[float] = None
 
 class ProductoOut(ProductoCreate):
-    id: int
+     id: int
 
-    class Config:
-        orm_mode = True
+     class Config:
+         orm_mode = True
